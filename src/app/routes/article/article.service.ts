@@ -12,6 +12,11 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
 
   orAuthorQuery.push({
     demo: {
+      equals: false,
+    },
+  });
+  orAuthorQuery.push({
+    demo: {
       equals: true,
     },
   });
@@ -68,6 +73,11 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
 
 export const getArticles = async (query: any, id?: number) => {
   const andQueries = buildFindAllQuery(query, id);
+
+  // console.log(andQueries[0].author.OR); // it returns [ { demo: { equals: true } } ]
+  // console.log(andQueries[0].author.AND); // it returns [ { demo: { equals: true } } ]
+  // console.log(id); //undifined
+
   const articlesCount = await prisma.article.count({
     where: {
       AND: andQueries,
@@ -168,7 +178,9 @@ export const createArticle = async (article: any, id: number) => {
   }
 
   if (!description) {
-    throw new HttpException(422, { errors: { description: ["can't be blank"] } });
+    throw new HttpException(422, {
+      errors: { description: ["can't be blank"] },
+    });
   }
 
   if (!body) {
@@ -416,19 +428,18 @@ export const deleteArticle = async (slug: string, id: number) => {
 export const getCommentsByArticle = async (slug: string, id?: number) => {
   const queries = [];
 
-  queries.push({
-    author: {
-      demo: true,
-    },
-  });
-
-  if (id) {
-    queries.push({
-      author: {
-        id,
-      },
-    });
-  }
+  // queries.push({
+  //   author: {
+  //     demo: true,
+  //   },
+  // });
+  // if (id) {
+  //   queries.push({
+  //     author: {
+  //       id,
+  //     },
+  //   });
+  // }
 
   const comments = await prisma.article.findUnique({
     where: {
@@ -436,9 +447,9 @@ export const getCommentsByArticle = async (slug: string, id?: number) => {
     },
     include: {
       comments: {
-        where: {
-          OR: queries,
-        },
+        // where: {
+        //   OR: queries,
+        // },
         select: {
           id: true,
           createdAt: true,
@@ -463,7 +474,9 @@ export const getCommentsByArticle = async (slug: string, id?: number) => {
       username: comment.author.username,
       bio: comment.author.bio,
       image: comment.author.image,
-      following: comment.author.followedBy.some((follow: any) => follow.id === id),
+      following: comment.author.followedBy.some(
+        (follow: any) => follow.id === id
+      ),
     },
   }));
 
@@ -519,7 +532,9 @@ export const addComment = async (body: string, slug: string, id: number) => {
       username: comment.author.username,
       bio: comment.author.bio,
       image: comment.author.image,
-      following: comment.author.followedBy.some((follow: any) => follow.id === id),
+      following: comment.author.followedBy.some(
+        (follow: any) => follow.id === id
+      ),
     },
   };
 };
@@ -598,7 +613,9 @@ export const favoriteArticle = async (slugPayload: string, id: number) => {
     ...article,
     author: profileMapper(article.author, id),
     tagList: article?.tagList.map((tag: Tag) => tag.name),
-    favorited: article.favoritedBy.some((favorited: any) => favorited.id === id),
+    favorited: article.favoritedBy.some(
+      (favorited: any) => favorited.id === id
+    ),
     favoritesCount: _count?.favoritedBy,
   };
 
@@ -644,7 +661,9 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
     ...article,
     author: profileMapper(article.author, id),
     tagList: article?.tagList.map((tag: Tag) => tag.name),
-    favorited: article.favoritedBy.some((favorited: any) => favorited.id === id),
+    favorited: article.favoritedBy.some(
+      (favorited: any) => favorited.id === id
+    ),
     favoritesCount: _count?.favoritedBy,
   };
 
