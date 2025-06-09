@@ -11,12 +11,15 @@ ENV PORT=3000
 
 WORKDIR /app
 
+# Install OpenSSL
+RUN apk add --no-cache openssl
+
 RUN addgroup --system api && \
     adduser --system -G api api
 
-# Copy package files
+# Copy package files and prisma schema
 COPY package*.json ./
-COPY src/prisma ./prisma/
+COPY src/prisma/schema.prisma ./prisma/
 
 # Install dependencies including devDependencies (needed for prisma generate)
 RUN npm install
