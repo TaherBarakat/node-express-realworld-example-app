@@ -39,9 +39,22 @@ RUN cd api && \
     sed -i 's|"seed": "src/prisma/seed.ts"|"seed": "prisma/seed.ts"|g' package.json && \
     # Generate Prisma Client
     npx prisma generate && \
-    # Create and apply migrations
-    npx prisma migrate deploy && \
     cd ..
+
+# Create startup script
+RUN echo '#!/bin/sh\n\
+# Wait for database to be ready\n\
+echo "Waiting for database..."\n\
+sleep 5\n\
+\n\
+# Run migrations\n\
+echo "Running database migrations..."\n\
+npx prisma migrate deploy\n\
+\n\
+# Start the application\n\
+echo "Starting application..."\n\
+node main.js\n\
+' > /app/api/start.sh && chmod +x /app/api/start.sh
 
 # Set proper ownership
 RUN chown -R api:api .
@@ -55,5 +68,5 @@ USER api
 # Set working directory to api
 WORKDIR /app/api
 
-# Use main.js as the entry point
-CMD [ "node", "main.js" ]
+# Use the startup script
+CMD [ "./start.sh" ]
