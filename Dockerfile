@@ -30,10 +30,13 @@ RUN npm install
 # Copy the application first
 COPY dist/api api
 
-# Generate Prisma Client in the api directory
+# Update package.json in api directory and generate Prisma Client
 RUN cd api && \
     cp -r ../prisma . && \
     npm install @prisma/client && \
+    # Update prisma schema path in package.json
+    sed -i 's|"schema": "src/prisma/schema.prisma"|"schema": "prisma/schema.prisma"|g' package.json && \
+    sed -i 's|"seed": "src/prisma/seed.ts"|"seed": "prisma/seed.ts"|g' package.json && \
     npx prisma generate && \
     cd ..
 
