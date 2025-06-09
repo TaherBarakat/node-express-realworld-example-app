@@ -17,15 +17,18 @@ RUN apk add --no-cache openssl
 RUN addgroup --system api && \
     adduser --system -G api api
 
-# Copy package files and prisma schema
+# Copy package files and prisma files
 COPY package*.json ./
-COPY src/prisma/schema.prisma ./prisma/
+COPY src/prisma ./prisma/
+
+# Create prisma directory if it doesn't exist
+RUN mkdir -p prisma
 
 # Install dependencies including devDependencies (needed for prisma generate)
 RUN npm install
 
 # Generate Prisma Client
-RUN npx prisma generate
+RUN cd prisma && npx prisma generate
 
 # Copy the rest of the application
 COPY dist/api api
