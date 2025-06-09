@@ -27,11 +27,17 @@ RUN mkdir -p prisma
 # Install dependencies including devDependencies (needed for prisma generate)
 RUN npm install
 
-# Generate Prisma Client
-RUN cd prisma && npx prisma generate
-
-# Copy the rest of the application
+# Copy the application first
 COPY dist/api api
+
+# Generate Prisma Client in the api directory
+RUN cd api && \
+    cp -r ../prisma . && \
+    npm install @prisma/client && \
+    npx prisma generate && \
+    cd ..
+
+# Set proper ownership
 RUN chown -R api:api .
 
 # Install production dependencies only
@@ -40,4 +46,7 @@ RUN npm --prefix api --omit=dev -f install
 # Switch to non-root user
 USER api
 
-CMD [ "node", "api" ]
+# Set working directory to api
+WORKDIR /app/api
+
+CMD [ "node", "index.js" ]
