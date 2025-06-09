@@ -37,7 +37,10 @@ RUN cd api && \
     # Update prisma schema path in package.json
     sed -i 's|"schema": "src/prisma/schema.prisma"|"schema": "prisma/schema.prisma"|g' package.json && \
     sed -i 's|"seed": "src/prisma/seed.ts"|"seed": "prisma/seed.ts"|g' package.json && \
+    # Generate Prisma Client
     npx prisma generate && \
+    # Create and apply migrations
+    npx prisma migrate deploy && \
     cd ..
 
 # Set proper ownership
