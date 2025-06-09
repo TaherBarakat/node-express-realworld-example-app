@@ -52,4 +52,5 @@ USER api
 # Set working directory to api
 WORKDIR /app/api
 
-CMD [ "node", "index.js" ]
+# Use main.js as the entry point
+CMD [ "node", "main.js" ]
